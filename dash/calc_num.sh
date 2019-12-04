@@ -9,6 +9,10 @@ download_mpd=""
 save_path=""
 save_seg=0
 
+# mpd_type: 1:template, 2:timeline($Time$), 3:timeline($Number$)
+mpd_type=1
+
+
 function usage()
 {
     echo "Usage: $0 <-f mpd_file|-u mpd_url> [options...]"
@@ -16,6 +20,8 @@ function usage()
     echo " -f mpd_file    parse local mpd file"
     echo " -u mpd_url     get mpd from URL."
     echo " -i interval    request segments interval, default value: segment duration"
+    echo " -t timestamp   get the segment number at a given time(seconds since 1970-01-01 00:00:00 UTC)."
+    echo " -w             download and save segments."
     exit 0;
 }
 
@@ -67,6 +73,7 @@ fi
 if [ ! -f $mpd_file ]
 then
     echo "Can not open mpd file $mpd_file."
+    usage
 exit 0
 fi
 
