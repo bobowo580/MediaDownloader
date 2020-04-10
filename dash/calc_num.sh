@@ -11,8 +11,25 @@ save_seg=0
 seg_count=0
 last_d=0
 last_t=0
-# mpd_type: 1:template, 2:timeline($Time$), 3:timeline($Number$)
+# mpd_type: 1:template, 2:timeline
 mpd_type=1
+current_time=0
+list_url=0
+
+function usage()
+{
+    echo "Usage: $0 <-f mpd_file|-u mpd_url> [options...]"
+    echo "Options:"
+    echo " -f mpd_file    parse local mpd file"
+    echo " -u mpd_url     get mpd from URL."
+    echo " -i interval    request segments interval, default value: segment duration"
+    echo " -t timestamp   get the segment number at a given time(seconds since 1970-01-01 00:00:00 UTC)."
+    echo " -w             download and save segments."
+    echo " -l             list all segments t for timeline MPD."
+    exit 0;
+}
+
+
 
 function get_current_num()
 {
@@ -62,23 +79,49 @@ echo "seg_count="$seg_count
 echo "last_t="$last_t
 echo "last_d="$last_d
 
-
 }
 
 
-function usage()
+function list_all_seg_url()
 {
-    echo "Usage: $0 <-f mpd_file|-u mpd_url> [options...]"
-    echo "Options:"
-    echo " -f mpd_file    parse local mpd file"
-    echo " -u mpd_url     get mpd from URL."
-    echo " -i interval    request segments interval, default value: segment duration"
-    echo " -t timestamp   get the segment number at a given time(seconds since 1970-01-01 00:00:00 UTC)."
-    echo " -w             download and save segments."
-    exit 0;
+    seg_start_pos=$(($(grep SegmentTimeline $mpd_file -n |head -1|awk -F: '{print $1}') + 1))
+    seg_end_pos=$(($(grep /SegmentTimeline $mpd_file -n |head -1|awk -F: '{print $1}') - 1 ))
+    sed -n "${seg_start_pos},${seg_end_pos}p" $mpd_file > timeline.temp
+    seg_count=0
+    next_t=0
+    while read line
+    do
+        t=$(echo $line |sed 's/ /\n/g' |grep t= |cut -d "\"" -f 2)
+        d=$(echo $line |sed 's/ /\n/g' |grep d= |cut -d "\"" -f 2)
+        r=$(echo $line |sed 's/ /\n/g' |grep r= |cut -d "\"" -f 2)
+
+            if [ -z $r ]
+            then
+                    r=0
+            fi
+            if [ -z $t ]
+            then
+                    t=$next_t
+            fi
+        for idx in $(seq 0 $r)
+        do
+            seg_url=${Rep_seg/\$Time\$/$t}
+            echo $seg_url
+            t=$(($t + $d))
+        done
+        next_t=$t
+        seg_count=$(($seg_count + $r + 1))
+
+    done   < timeline.temp
+    last_d=$d
+    last_t=$(($t + $d * $r))
+    echo "seg_count="$seg_count
+
 }
-######################################################################################################
-while getopts f:ct:i:u:wh OPTION; do
+
+
+################################### main ###################################################################
+while getopts f:ct:i:u:wlh OPTION; do
     case $OPTION in
     f)
         mpd_file=$OPTARG
@@ -94,6 +137,9 @@ while getopts f:ct:i:u:wh OPTION; do
     ;;
     w)
         save_seg=1
+    ;;
+    l)
+        list_url=1
     ;;
     h)
         usage
@@ -193,8 +239,6 @@ availabilityStartTime1=${availabilityStartTime1/T/ }
 #echo $availabilityStartTime1
 AST=`date -d  "${availabilityStartTime1}" -u +%s`
 echo "AST="$AST
-current_time=`date -u +%s`
-echo "current_time = "$current_time
 
 if [ -n "$past_time" ]
 then
@@ -213,7 +257,7 @@ fi
 
 
 
-timeshift=$(($current_time - $AST))
+#timeshift=$(($current_time - $AST))
 #echo $timeshift
 #current_number=$(($timeshift/($duration/$timescale) + $startNumber))
 #if [ $mpd_type -eq 2 ]
@@ -221,13 +265,20 @@ timeshift=$(($current_time - $AST))
 #    timeline
 #    current_number=$(($startNumber + $seg_count - 1 ))
 #fi
-get_current_num
-echo "current_number = "$current_number
+#get_current_num
+#echo "current_number = "$current_number
 
 Rep_seg=${media/\$RepresentationID\$/$Rep_id}
-current_seg=${Rep_seg/\$Number\$/$current_number}
-current_seg=${current_seg/\$Time\$/$last_t}
-echo "current_segment:"$current_seg
+#current_seg=${Rep_seg/\$Number\$/$current_number}
+#current_seg=${current_seg/\$Time\$/$last_t}
+#echo "current_segment:"$current_seg
+
+if [ $list_url -eq 1 ]
+then 
+    list_all_seg_url
+    exit 0 
+fi 
+
 
 while true
 do
