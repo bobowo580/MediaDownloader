@@ -23,7 +23,6 @@ function usage()
     echo " -f mpd_file    parse local mpd file"
     echo " -u mpd_url     get mpd from URL."
     echo " -i interval    request segments interval, default value: segment duration"
-    echo " -t timestamp   get the segment number at a given time(seconds since 1970-01-01 00:00:00 UTC)."
     echo " -w             download and save segments."
     echo " -l             list all segments t for timeline MPD."
     exit 0;
@@ -35,7 +34,8 @@ function get_current_num()
 {
     if [ $mpd_type -eq 1 ]
 	then
-		current_number=$(($timeshift/($duration/$timescale) + $startNumber))
+		current_number=$(($startNumber + $seg_count))
+        seg_count=$(($seg_count + 1))
 	fi
 	
 	if [ $mpd_type -eq 2 ]
@@ -177,11 +177,12 @@ exit 0
 fi
 
 echo $mpd_file
+
 sed -i 's/\&amp;/\&/g' $mpd_file
 
-if grep "type=\"static\"" $mpd_file > /dev/null 2>&1
+if grep "type=\"dynamic\"" $mpd_file > /dev/null 2>&1
 then
-    echo "mpd tpye is not dynamic. "
+    echo "mpd is not static. "
     exit 0;
 fi
 
@@ -192,9 +193,8 @@ then
 fi
 echo "mpd_type="$mpd_type
 
-minimumUpdatePeriod=$(grep "<MPD " $mpd_file |sed 's/ /\n/g'|grep minimumUpdatePeriod|cut -d "\"" -f 2|tr -d "a-zA-Z")
-echo "minimumUpdatePeriod="$minimumUpdatePeriod
-
+mediaPresentationDuration=$(grep "<MPD " $mpd_file |sed 's/ /\n/g'|grep mediaPresentationDuration|cut -d "\"" -f 2|tr -d "a-zA-Z")
+echo "mediaPresentationDuration="$mediaPresentationDuration
 
 availabilityStartTime=$(grep availabilityStartTime $mpd_file |sed 's/ /\n/g'|grep availabilityStartTime|cut -d "\"" -f 2)
 echo "availabilityStartTime="$availabilityStartTime
@@ -280,25 +280,27 @@ then
     exit 0 
 fi 
 
+seg_count=0
 
 while true
 do
 current_time=`date -u +%s`
-echo "current_time = "$current_time
+#echo "current_time = "$current_time
 timeshift=$(($current_time - $AST))
 get_current_num #current_number=$(($timeshift/($duration/$timescale) + $startNumber))
-echo "current_number = "$current_number
+#echo "current_number = "$current_number
 current_seg=${Rep_seg/\$Number\$/$current_number}
 current_seg=${current_seg/\$Time\$/$last_t}
-echo "current_segment:"$current_seg
+seg_name=${current_seg%\?*}
+echo "current_segment : "$seg_name
 segment_url=$url_base"/"$current_seg
-echo "segment url:"$segment_url
+echo "segment_url : "$segment_url
 #echo ${current_seg%%\?*}
 
 if [ $save_seg -eq 1 ]
 then
     echo "downloading "${current_seg%%\?*}
-    curl  $segment_url -o ${current_seg%%\?*}  > /dev/null 2>1& 
+    curl  $segment_url -o $seg_name  > /dev/null 2>1& 
 fi
 
 sleep $interval
