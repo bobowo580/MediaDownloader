@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MPD xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="urn:mpeg:dash:schema:mpd:2011" xsi:schemaLocation="urn:mpeg:dash:schema:mpd:2011 http://standards.iso.org/ittf/PubliclyAvailableStandards/MPEG-DASH_schema_files/DASH-MPD.xsd" profiles="urn:mpeg:dash:profile:isoff-live:2011" xmlns:cenc="urn:mpeg:cenc:2013" availabilityStartTime="1970-01-01T00:00:00Z" type="static" minBufferTime="PT2.048S" mediaPresentationDuration="PT302.000S" xmlns:huaweijitx="urn:huawei:jitx" >
+  <huaweijitx:metainfo value="eyJkcm1NZXRhSW5mbyI6IFt7ImRybUNvbnRlbnRpZCI6ICIzODk0IiwiZGlzdHJpYnV0aW9uTW9kZSI6ICJMSVZFIiwiZHJtTGlzdCI6IFtdfV19"/>
+  <Period id="0" start="PT0.000S" >
+    <AdaptationSet segmentAlignment="true" contentType="video" maxWidth="1920" maxHeight="1080" maxFrameRate="50/1" >
+      <Representation id="video_4" bandwidth="5272792" codecs="avc1.640029" priAvgBw="4000911" mimeType="video/mp4" width="1280" height="720" frameRate="25/1" sar="1:1" >
+        <SegmentTemplate timescale="90000" initialization="$RepresentationID$-PolicyMode_3_dash_2_pr_prm_wv_nrgsspdash_cenc_iso-1622001222.m4i?start=2021-05-28T16:50:00Z&end=2021-05-28T16:55:00Z&device=DASH_STB_NGRSSP_LIVE_HD_ONLY&pbf=2_5_2_110350387" startNumber="6338" media="$RepresentationID$-$Time$-145980109980000-PolicyMode_3_dash_2_pr_prm_wv_nrgsspdash_cenc_iso-1622001222.m4v?start=2021-05-28T16:50:00Z&end=2021-05-28T16:55:00Z&device=DASH_STB_NGRSSP_LIVE_HD_ONLY&pbf=2_5_2_110350387" presentationTimeOffset="145999853968410" >
+          <SegmentTimeline>
+            <S t="145999853986410" d="180000" r="150" />
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+      <Representation id="video_5" bandwidth="8111656" codecs="avc1.64002a" priAvgBw="5988528" mimeType="video/mp4" width="1920" height="1080" frameRate="50/1" sar="1:1" >
+        <SegmentTemplate timescale="90000" initialization="$RepresentationID$-PolicyMode_3_dash_2_pr_prm_wv_nrgsspdash_cenc_iso-1622001222.m4i?start=2021-05-28T16:50:00Z&end=2021-05-28T16:55:00Z&device=DASH_STB_NGRSSP_LIVE_HD_ONLY&pbf=2_5_2_110350387" startNumber="6338" media="$RepresentationID$-$Time$-145980109980000-PolicyMode_3_dash_2_pr_prm_wv_nrgsspdash_cenc_iso-1622001222.m4v?start=2021-05-28T16:50:00Z&end=2021-05-28T16:55:00Z&device=DASH_STB_NGRSSP_LIVE_HD_ONLY&pbf=2_5_2_110350387" presentationTimeOffset="145999853968410" >
+          <SegmentTimeline>
+            <S t="145999853986410" d="180000" r="150" />
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet segmentAlignment="true" contentType="audio" lang="hun" codecs="mp4a.40.2" channels="2" >
+      <Representation id="audio_hun_mp4a.40_2" bandwidth="98724" codecs="mp4a.40.2" priAvgBw="96890" mimeType="audio/mp4" audioSamplingRate="24000" >
+        <SegmentTemplate timescale="90000" initialization="$RepresentationID$-PolicyMode_3_dash_2_pr_prm_wv_nrgsspdash_cenc_iso-1622001222.m4i?start=2021-05-28T16:50:00Z&end=2021-05-28T16:55:00Z&device=DASH_STB_NGRSSP_LIVE_HD_ONLY&pbf=2_5_2_110350387" startNumber="6338" media="$RepresentationID$-$Time$-145980109980000-PolicyMode_3_dash_2_pr_prm_wv_nrgsspdash_cenc_iso-1622001222.m4a?start=2021-05-28T16:50:00Z&end=2021-05-28T16:55:00Z&device=DASH_STB_NGRSSP_LIVE_HD_ONLY&pbf=2_5_2_110350387" presentationTimeOffset="145999853968410" >
+          <SegmentTimeline>
+            <S t="145999853980729" d="180480" />
+            <S d="176640" />
+            <S d="184320" />
+            <S d="176640" />
+            <S d="180480" r="4" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="4" />
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet segmentAlignment="true" contentType="audio" lang="mul" codecs="mp4a.40.2" channels="2" >
+      <Representation id="audio_mul_mp4a.40_2" bandwidth="98688" codecs="mp4a.40.2" priAvgBw="96891" mimeType="audio/mp4" audioSamplingRate="24000" >
+        <SegmentTemplate timescale="90000" initialization="$RepresentationID$-PolicyMode_3_dash_2_pr_prm_wv_nrgsspdash_cenc_iso-1622001222.m4i?start=2021-05-28T16:50:00Z&end=2021-05-28T16:55:00Z&device=DASH_STB_NGRSSP_LIVE_HD_ONLY&pbf=2_5_2_110350387" startNumber="6338" media="$RepresentationID$-$Time$-145980109980000-PolicyMode_3_dash_2_pr_prm_wv_nrgsspdash_cenc_iso-1622001222.m4a?start=2021-05-28T16:50:00Z&end=2021-05-28T16:55:00Z&device=DASH_STB_NGRSSP_LIVE_HD_ONLY&pbf=2_5_2_110350387" presentationTimeOffset="145999853968410" >
+          <SegmentTimeline>
+            <S t="145999853980729" d="180480" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="4" />
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet segmentAlignment="true" contentType="audio" lang="nar" codecs="mp4a.40.2" channels="2" >
+      <Representation id="audio_nar_mp4a.40_2" bandwidth="98712" codecs="mp4a.40.2" priAvgBw="96891" mimeType="audio/mp4" audioSamplingRate="24000" >
+        <SegmentTemplate timescale="90000" initialization="$RepresentationID$-PolicyMode_3_dash_2_pr_prm_wv_nrgsspdash_cenc_iso-1622001222.m4i?start=2021-05-28T16:50:00Z&end=2021-05-28T16:55:00Z&device=DASH_STB_NGRSSP_LIVE_HD_ONLY&pbf=2_5_2_110350387" startNumber="6338" media="$RepresentationID$-$Time$-145980109980000-PolicyMode_3_dash_2_pr_prm_wv_nrgsspdash_cenc_iso-1622001222.m4a?start=2021-05-28T16:50:00Z&end=2021-05-28T16:55:00Z&device=DASH_STB_NGRSSP_LIVE_HD_ONLY&pbf=2_5_2_110350387" presentationTimeOffset="145999853968410" >
+          <SegmentTimeline>
+            <S t="145999853980729" d="180480" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="6" />
+            <S d="176640" />
+            <S d="180480" r="4" />
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>
+
