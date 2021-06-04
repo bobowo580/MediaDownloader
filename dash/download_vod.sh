@@ -308,7 +308,6 @@ video_seg_name=${current_video_seg%\?*}
 echo "current_video_segment: "$video_seg_name
 video_segment_url=$url_base"/"$current_video_seg
 echo "segment_video_url: "$video_segment_url
-#echo ${current_seg%%\?*}
 
 current_audio_seg=${audio_rep_seg/\$Number\$/$current_number}
 current_audio_seg=${current_audio_seg/\$Time\$/$last_t}
