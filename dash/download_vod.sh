@@ -40,14 +40,14 @@ function get_current_num()
 	
 	if [ $mpd_type -eq 2 ]
 	then
-		timeline
+		handle_timeline
 		current_number=$(($startNumber + $seg_count - 1 ))
 	fi
 	
 	
 }
 
-function timeline()
+function handle_timeline()
 {
 seg_start_pos=$(($(grep SegmentTimeline $mpd_file -n |head -1|awk -F: '{print $1}') + 1))
 seg_end_pos=$(($(grep /SegmentTimeline $mpd_file -n |head -1|awk -F: '{print $1}') - 1 ))
@@ -105,7 +105,7 @@ function list_all_seg_url()
             fi
         for idx in $(seq 0 $r)
         do
-            seg_url=${Rep_seg/\$Time\$/$t}
+            seg_url=${video_rep_seg/\$Time\$/$t}
             echo $seg_url
             t=$(($t + $d))
         done
@@ -119,7 +119,7 @@ function list_all_seg_url()
 
 }
 
-
+#todo: support timeline
 ################################### main ###################################################################
 while getopts f:ct:i:u:wlh OPTION; do
     case $OPTION in
@@ -216,7 +216,7 @@ then
 fi
 if [ $mpd_type -eq 2 ]
 then
-    timeline
+    handle_timeline
     seg_duration=$(($last_d/$timescale))
 fi
 echo "seg_duration="$seg_duration
@@ -283,6 +283,11 @@ audio_rep_seg=${audio_media/\$RepresentationID\$/$audio_Rep_id}
 
 if [ $list_url -eq 1 ]
 then 
+    if [ $mpd_type -ne 2 ]
+    then 
+        echo "not support template MPD"
+        exit 0
+    fi
     list_all_seg_url
     exit 0 
 fi 

@@ -4,7 +4,7 @@
   <Period id="0" start="PT0.000S" >
     <AdaptationSet segmentAlignment="true" contentType="video" maxWidth="720" maxHeight="576" maxFrameRate="50/1" >
       <Representation id="video_0" bandwidth="2595836" codecs="avc1.4d4029" mimeType="video/mp4" width="720" height="576" frameRate="50/1" >
-        <SegmentTemplate timescale="90000" initialization="$RepresentationID$-PolicyMode_3_dash_2_prm_nagra_dash_ssp_cenc_iso.m4i?start=LIVE&amp;end=END&amp;device=DASH_STB_NGRSSP_LIVE_SD&amp;pro_bus_file=2_2_2_3563148235_88888888" startNumber="66388" media="$RepresentationID$-$Time$-140909419170000-PolicyMode_3_dash_2_prm_nagra_dash_ssp_cenc_iso.m4v?start=LIVE&amp;end=END&amp;device=DASH_STB_NGRSSP_LIVE_SD&amp;pro_bus_file=2_2_2_3563148235_88888888" presentationTimeOffset="0" >
+        <SegmentTemplate timescale="90000" initialization="$RepresentationID$-PolicyMode_3_dash_2_prm_nagra_dash_ssp_cenc_iso.m4i?start=LIVE&end=END&device=DASH_STB_NGRSSP_LIVE_SD&pro_bus_file=2_2_2_3563148235_88888888" startNumber="66388" media="$RepresentationID$-$Time$-140909419170000-PolicyMode_3_dash_2_prm_nagra_dash_ssp_cenc_iso.m4v?start=LIVE&end=END&device=DASH_STB_NGRSSP_LIVE_SD&pro_bus_file=2_2_2_3563148235_88888888" presentationTimeOffset="0" >
           <SegmentTimeline>
             <S t="141794011632780" d="180000" r="5"/>
             <S d="180000" />
@@ -42,7 +42,7 @@
         </SegmentTemplate>
       </Representation>
       <Representation id="video_1" bandwidth="1778736" codecs="avc1.4d401f" mimeType="video/mp4" width="720" height="404" frameRate="25/1" >
-        <SegmentTemplate timescale="90000" initialization="$RepresentationID$-PolicyMode_3_dash_2_prm_nagra_dash_ssp_cenc_iso.m4i?start=LIVE&amp;end=END&amp;device=DASH_STB_NGRSSP_LIVE_SD&amp;pro_bus_file=2_2_2_3563148235_88888888" startNumber="66388" media="$RepresentationID$-$Time$-140909419170000-PolicyMode_3_dash_2_prm_nagra_dash_ssp_cenc_iso.m4v?start=LIVE&amp;end=END&amp;device=DASH_STB_NGRSSP_LIVE_SD&amp;pro_bus_file=2_2_2_3563148235_88888888" presentationTimeOffset="0" >
+        <SegmentTemplate timescale="90000" initialization="$RepresentationID$-PolicyMode_3_dash_2_prm_nagra_dash_ssp_cenc_iso.m4i?start=LIVE&end=END&device=DASH_STB_NGRSSP_LIVE_SD&pro_bus_file=2_2_2_3563148235_88888888" startNumber="66388" media="$RepresentationID$-$Time$-140909419170000-PolicyMode_3_dash_2_prm_nagra_dash_ssp_cenc_iso.m4v?start=LIVE&end=END&device=DASH_STB_NGRSSP_LIVE_SD&pro_bus_file=2_2_2_3563148235_88888888" presentationTimeOffset="0" >
           <SegmentTimeline>
             <S t="141794011632780" d="180000" />
             <S d="180000" />
@@ -87,7 +87,7 @@
     </AdaptationSet>
     <AdaptationSet segmentAlignment="true" contentType="audio" lang="eng" codecs="mp4a.40.2" channels="2" >
       <Representation id="audio_eng_mp4a.40_2" bandwidth="96152" codecs="mp4a.40.2" mimeType="audio/mp4" audioSamplingRate="24000" >
-        <SegmentTemplate timescale="90000" initialization="$RepresentationID$-PolicyMode_3_dash_2_prm_nagra_dash_ssp_cenc_iso.m4i?start=LIVE&amp;end=END&amp;device=DASH_STB_NGRSSP_LIVE_SD&amp;pro_bus_file=2_2_2_3563148235_88888888" startNumber="66388" media="$RepresentationID$-$Time$-140909419170000-PolicyMode_3_dash_2_prm_nagra_dash_ssp_cenc_iso.m4a?start=LIVE&amp;end=END&amp;device=DASH_STB_NGRSSP_LIVE_SD&amp;pro_bus_file=2_2_2_3563148235_88888888" presentationTimeOffset="0" >
+        <SegmentTemplate timescale="90000" initialization="$RepresentationID$-PolicyMode_3_dash_2_prm_nagra_dash_ssp_cenc_iso.m4i?start=LIVE&end=END&device=DASH_STB_NGRSSP_LIVE_SD&pro_bus_file=2_2_2_3563148235_88888888" startNumber="66388" media="$RepresentationID$-$Time$-140909419170000-PolicyMode_3_dash_2_prm_nagra_dash_ssp_cenc_iso.m4a?start=LIVE&end=END&device=DASH_STB_NGRSSP_LIVE_SD&pro_bus_file=2_2_2_3563148235_88888888" presentationTimeOffset="0" >
           <SegmentTimeline>
             <S t="141794011624736" d="180480" />
             <S d="180480" />
