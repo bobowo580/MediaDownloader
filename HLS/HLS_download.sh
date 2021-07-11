@@ -1,6 +1,5 @@
 #!/bin/bash
 
-index_m3u8=""
 
 function usage()
 {
@@ -12,17 +11,25 @@ function usage()
     exit 0;
 }
 
-
-function download_media()
+trap 'onCtrlC' INT
+function onCtrlC () 
 {
-    curl -s $url_base"/"$1 -o m3u8.tmp
-    cat m3u8.tmp |grep -E "#EXT-X-MAP.*URI" | awk -F 'URI="' '{print $2}' |awk -F '"' '{print $1}' |sort|uniq  > seg_list.tmp
-    cat m3u8.tmp |grep -v "#EXT" |sort|uniq >> seg_list.tmp
-    dos2unix seg_list.tmp > /dev/null 2>&1
-    cat seg_list.tmp |while read line
+    rm m3u8.tmp rate_list.tmp seg_list.tmp > /dev/null 2>&1
+    rm *m3u8.list > /dev/null 2>&1
+    exit 0
+}
+
+function download_vod_seg()
+{
+    rate_m3u8=${1%\?*}
+    seg_list=$rate_m3u8".list"
+    curl -s $url_base"/"$1 -o $rate_m3u8 -w "$(date -u "+%Y-%m-%d_%H:%M:%S") %{http_code} $1 %{time_total}\n" |tee -a download.log
+    cat $rate_m3u8 |grep -E "#EXT-X-MAP.*URI" | awk -F 'URI="' '{print $2}' |awk -F '"' '{print $1}' |sort|uniq  > $seg_list
+    cat $rate_m3u8 |grep -v "#EXT" |sort|uniq >> $seg_list
+    dos2unix $seg_list > /dev/null 2>&1
+    cat $seg_list |while read seg
     do
-        echo $line
-        curl -s $url_base"/"$line -o ${line%\?*}
+        curl -s $url_base"/"$seg -o ${seg%\?*} -w "$(date -u "+%Y-%m-%d_%H:%M:%S") %{http_code} $seg %{time_total}\n" |tee -a download.log
     done
 
 }
@@ -30,18 +37,39 @@ function download_media()
 function download_vod()
 {
     echo "Start to download..."
-    cat rate_list.tmp |while read line
+    while read rate_m3u8;
     do
-        download_media $line
-    done
+        download_vod_seg $rate_m3u8 & 
+    done < rate_list.tmp
+    wait
 
 }
+
+function download_live_seg()
+{
+    rate_m3u8=$1
+    while true
+    do
+        seg=$(curl -s $url_base"/"$rate_m3u8 |tail -1 |dos2unix)
+        if [ ! -f ${seg%\?*} ]; then
+            curl -s $url_base"/"$seg -o ${seg%\?*} -w "$(date -u "+%Y-%m-%d_%H:%M:%S") %{http_code} $seg %{time_total}\n" |tee -a  download.log &
+        fi
+        sleep $((target_duration/2))
+    done
+        
+}
+
 
 function download_live()
 {
-    echo
-}
+    echo "Start to download..."
+    while read rate_m3u8
+    do
+        download_live_seg $rate_m3u8 & 
+    done < rate_list.tmp
+    wait
 
+}
 
 ################################### main ###################################################################
 while getopts f:ct:i:u:wlh OPTION; do
@@ -77,9 +105,8 @@ done
 
 if [ -n "$req_url" ]
 then
-    index_m3u8="index.m3u8.tmp"
-    rm -f $index_m3u8
-    curl -v $req_url -o $index_m3u8 -L --connect-timeout 2 2>curl.result
+    rm -f m3u8.tmp
+    curl -v $req_url -o m3u8.tmp  --connect-timeout 2 2>curl.result -w "$(date -u "+%Y-%m-%d_%H:%M:%S") %{http_code} $req_url %{time_total}\n" >> download.log
     resp=$(grep "< HTTP/.*200" curl.result)
     if [ -z "$resp" ]
     then 
@@ -98,25 +125,29 @@ else
     exit 0
 fi
 
-grep EXT-X-VERSION $index_m3u8
-cat $index_m3u8 |grep -E "#EXT-X-MEDIA.*URI" | awk -F 'URI="' '{print $2}' |awk -F '"' '{print $1}' |sort|uniq  > rate_list.tmp
-cat $index_m3u8 |grep -v "#EXT" |sort|uniq >> rate_list.tmp
+grep EXT-X-VERSION m3u8.tmp
+cat m3u8.tmp |grep -E "#EXT-X-MEDIA.*URI" | awk -F 'URI="' '{print $2}' |awk -F '"' '{print $1}' |sort|uniq  > rate_list.tmp
+cat m3u8.tmp |grep -v "#EXT" |sort|uniq >> rate_list.tmp
 dos2unix rate_list.tmp > /dev/null 2>&1
 echo "RATE LIST:"
 cat rate_list.tmp |cut -d "?" -f 1
 echo 
 
-playlist_type=$(curl -s $url_base"/"`tail -1 rate_list.tmp`|grep EXT-X-PLAYLIST-TYPE |cut -d ':' -f 2|dos2unix)
-echo "PLAYLIST-TYPE: "$playlist_type
+curl -s $url_base"/"`tail -1 rate_list.tmp` -o m3u8.tmp
 
-if [ "$playlist_type" == "VOD" ];then
+target_duration=$(grep  "#EXT-X-TARGETDURATION" m3u8.tmp |cut -d ":" -f 2 |dos2unix)
+echo "DURATION: "$target_duration
+
+if grep -q -E "EXT-X-PLAYLIST-TYPE:VOD|EXT-X-ENDLIST" m3u8.tmp ;then
+    echo "PLAYLIST-TYPE: VOD"
     download_vod 
-elif [ "$playlist_type" == "EVENT" ];then
-    download_live 
 else
-    echo "Unknown PLAYLIST-TYPE: "$playlist_type
+    echo "PLAYLIST-TYPE: EVENT"
+    download_live 
 fi
 
 
 
+rm m3u8.tmp rate_list.tmp seg_list.tmp > /dev/null 2>&1
+rm *m3u8.list > /dev/null 2>&1 
 
