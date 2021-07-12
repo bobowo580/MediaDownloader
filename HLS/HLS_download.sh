@@ -15,7 +15,7 @@ trap 'onCtrlC' INT
 function onCtrlC () 
 {
     rm m3u8.tmp rate_list.tmp seg_list.tmp > /dev/null 2>&1
-    rm *m3u8.list > /dev/null 2>&1
+    rm *m3u8.list *.m3u8 > /dev/null 2>&1
     exit 0
 }
 
@@ -48,11 +48,16 @@ function download_vod()
 function download_live_seg()
 {
     rate_m3u8=$1
+    m3u8=${rate_m3u8%\?*}
+    last_seg="."
     while true
     do
-        seg=$(curl -s $url_base"/"$rate_m3u8 |tail -1 |dos2unix)
-        if [ ! -f ${seg%\?*} ]; then
-            curl -s $url_base"/"$seg -o ${seg%\?*} -w "$(date -u "+%Y-%m-%d_%H:%M:%S") %{http_code} $seg %{time_total}\n" |tee -a  download.log &
+        curl -s $url_base"/"$rate_m3u8 -o $m3u8 -w "$(date -u "+%Y-%m-%d_%H:%M:%S") %{http_code} $rate_m3u8 %{time_total}\n" >> download.log 
+        seg=$(grep -v "#EXT" $m3u8|grep $last_seg -A1|tail -1 |dos2unix)
+        seg_name=${seg%\?*}
+        if [ ! -f $seg_name ]; then
+            curl -s $url_base"/"$seg -o $seg_name -w "$(date -u "+%Y-%m-%d_%H:%M:%S") %{http_code} $seg %{time_total}\n" |tee -a  download.log &
+            last_seg=$seg_name
         fi
         sleep $((target_duration/2))
     done
@@ -149,5 +154,5 @@ fi
 
 
 rm m3u8.tmp rate_list.tmp seg_list.tmp > /dev/null 2>&1
-rm *m3u8.list > /dev/null 2>&1 
+rm *m3u8.list  *.m3u8 > /dev/null 2>&1 
 
