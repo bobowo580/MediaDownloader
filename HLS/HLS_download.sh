@@ -1,13 +1,14 @@
 #!/bin/bash
 
+request_profile="."
+
 
 function usage()
 {
     echo "Usage: $0 <-u media_url> [options...]"
     echo "Options:"
-    echo " -u media_url     m3u8 index URL."
-    echo " -i interval    request segments interval, default value: segment duration"
-    echo " -w             download and save segments."
+    echo " -u <media_url>     m3u8 index URL."
+    echo " -p <profile>    download specified profile only. default: download all profile"
     exit 0;
 }
 
@@ -77,7 +78,7 @@ function download_live()
 }
 
 ################################### main ###################################################################
-while getopts f:ct:i:u:wlh OPTION; do
+while getopts f:cp:i:u:wh OPTION; do
     case $OPTION in
     f)
         mpd_file=$OPTARG
@@ -88,14 +89,11 @@ while getopts f:ct:i:u:wlh OPTION; do
     i)
 	interval=$OPTARG
     ;;
-    t)
-        past_time=$OPTARG
-    ;;
     w)
         save_seg=1
     ;;
-    l)
-        list_url=1
+    p)
+        request_profile=$OPTARG
     ;;
     h)
         usage
@@ -131,8 +129,8 @@ else
 fi
 
 grep EXT-X-VERSION m3u8.tmp
-cat m3u8.tmp |grep -E "#EXT-X-MEDIA.*URI" | awk -F 'URI="' '{print $2}' |awk -F '"' '{print $1}' |sort|uniq  > rate_list.tmp
-cat m3u8.tmp |grep -v "#EXT" |sort|uniq >> rate_list.tmp
+grep -E $request_profile m3u8.tmp |grep -E "#EXT-X-MEDIA.*URI" | awk -F 'URI="' '{print $2}' |awk -F '"' '{print $1}' |sort|uniq  > rate_list.tmp
+grep -E $request_profile m3u8.tmp |grep -v "#EXT" |sort|uniq >> rate_list.tmp
 dos2unix rate_list.tmp > /dev/null 2>&1
 echo "RATE LIST:"
 cat rate_list.tmp |cut -d "?" -f 1
