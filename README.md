@@ -1,3 +1,5 @@
-# testRepo
+# HLS & DASH media downloader 
+Download HLS/DASH format video with bash command line.
 
-HLS & DASH media downloader 
+# Usage
+./HLS_download.sh -u <URL>
