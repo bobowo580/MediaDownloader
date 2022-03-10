@@ -33,51 +33,50 @@ function usage()
 function get_current_num()
 {
     if [ $mpd_type -eq 1 ]
-	then
-		current_number=$(($startNumber + $seg_count))
+    then
+        current_number=$(($startNumber + $seg_count))
         seg_count=$(($seg_count + 1))
-	fi
+    fi 
 	
-	if [ $mpd_type -eq 2 ]
-	then
-		handle_timeline
-		current_number=$(($startNumber + $seg_count - 1 ))
-	fi
+    if [ $mpd_type -eq 2 ]
+    then
+        handle_timeline
+        current_number=$(($startNumber + $seg_count - 1 ))
+    fi
 	
 	
 }
 
 function handle_timeline()
 {
-seg_start_pos=$(($(grep SegmentTimeline $mpd_file -n |head -1|awk -F: '{print $1}') + 1))
-seg_end_pos=$(($(grep /SegmentTimeline $mpd_file -n |head -1|awk -F: '{print $1}') - 1 ))
-sed -n "${seg_start_pos},${seg_end_pos}p" $mpd_file > timeline.temp
-seg_count=0
-next_t=0
-while read line 
-do 
-    t=$(echo $line |sed 's/ /\n/g' |grep t= |cut -d "\"" -f 2)
-    d=$(echo $line |sed 's/ /\n/g' |grep d= |cut -d "\"" -f 2)
-    r=$(echo $line |sed 's/ /\n/g' |grep r= |cut -d "\"" -f 2)
+    seg_start_pos=$(($(grep SegmentTimeline $mpd_file -n |head -1|awk -F: '{print $1}') + 1))
+    seg_end_pos=$(($(grep /SegmentTimeline $mpd_file -n |head -1|awk -F: '{print $1}') - 1 ))
+    sed -n "${seg_start_pos},${seg_end_pos}p" $mpd_file > timeline.temp
+    seg_count=0
+    next_t=0
+    while read line 
+    do 
+        t=$(echo $line |sed 's/ /\n/g' |grep t= |cut -d "\"" -f 2)
+        d=$(echo $line |sed 's/ /\n/g' |grep d= |cut -d "\"" -f 2)
+        r=$(echo $line |sed 's/ /\n/g' |grep r= |cut -d "\"" -f 2)
     
 	if [ -z $r ]
 	then 
-		r=0
+	    r=0
 	fi 
 	if [ -z $t ]
 	then 
-		t=$next_t
+	    t=$next_t
 	fi
-    next_t=$(($t + $d*($r + 1)))
-    seg_count=$(($seg_count + $r + 1))
+        next_t=$(($t + $d*($r + 1)))
+        seg_count=$(($seg_count + $r + 1))
+    done   < timeline.temp 
 
-
-done   < timeline.temp 
-last_d=$d
-last_t=$(($t + $d * $r))
-echo "seg_count="$seg_count
-echo "last_t="$last_t
-echo "last_d="$last_d
+    last_d=$d
+    last_t=$(($t + $d * $r))
+    echo "seg_count="$seg_count
+    echo "last_t="$last_t
+    echo "last_d="$last_d
 
 }
 
@@ -231,6 +230,9 @@ echo "video_media="$video_media
 audio_media=$(awk '/contentType="audio"/{audio=1} {if(audio==1 && /<SegmentTemplate/)print }' $mpd_file |head -1|sed 's/ /\n/g'|grep media= |cut -d "\"" -f 2)
 #media=${media//\"/}
 echo "audio_media="$audio_media
+subtitle_media=$(awk '/contentType="text"/{text=1} {if(text==1 && /<SegmentTemplate/)print }' $mpd_file |head -1|sed 's/ /\n/g'|grep media= |cut -d "\"" -f 2)
+#media=${media//\"/}
+echo "subtitle_media="$subtitle_media
 
 video_Rep_id=$(awk '/contentType="video"/{video=1} {if(video==1 && /<Representation/)print }'  $mpd_file |head -1|sed 's/ /\n/g'|grep id= |cut -d "\"" -f 2)
 #video_Rep_id=${video_Rep_id//\"/}
@@ -238,6 +240,10 @@ echo "video_Representation_id="$video_Rep_id
 
 audio_Rep_id=$(awk '/contentType="audio"/{audio=1} {if(audio==1 && /<Representation/)print }'  $mpd_file |head -1|sed 's/ /\n/g'|grep id= |cut -d "\"" -f 2)
 echo "audio_Representation_id="$audio_Rep_id
+
+subtitle_Rep_id=$(awk '/contentType="text"/{text=1} {if(text==1 && /<Representation/)print }'  $mpd_file |head -1|sed 's/ /\n/g'|grep id= |cut -d "\"" -f 2)
+echo "subtitle_Representation_id="$subtitle_Rep_id
+
 
 
 availabilityStartTime1=${availabilityStartTime/Z/}
@@ -263,7 +269,6 @@ then
 fi
 
 
-
 #timeshift=$(($current_time - $AST))
 #echo $timeshift
 #current_number=$(($timeshift/($duration/$timescale) + $startNumber))
@@ -277,6 +282,7 @@ fi
 
 video_rep_seg=${video_media/\$RepresentationID\$/$video_Rep_id}
 audio_rep_seg=${audio_media/\$RepresentationID\$/$audio_Rep_id}
+subtitle_rep_seg=${subtitle_media/\$RepresentationID\$/$subtitle_Rep_id}
 #current_seg=${Rep_seg/\$Number\$/$current_number}
 #current_seg=${current_seg/\$Time\$/$last_t}
 #echo "current_segment:"$current_seg
@@ -316,6 +322,16 @@ echo "current_audio_segment: "$audio_seg_name
 audio_segment_url=$url_base"/"$current_audio_seg
 echo "segment_audio_url: "$audio_segment_url
 
+if [ -n $subtitle_media ]
+then
+    current_subtitle_seg=${subtitle_rep_seg/\$Number\$/$current_number}
+    current_subtitle_seg=${current_subtitle_seg/\$Time\$/$last_t}
+    subtitle_seg_name=${current_subtitle_seg%\?*}
+    echo "current_subtitle_segment: "$subtitle_seg_name
+    subtitle_segment_url=$url_base"/"$current_subtitle_seg
+    echo "segment_subtitle_url: "$subtitle_segment_url
+fi
+
 
 if [ $save_seg -eq 1 ]
 then
@@ -323,10 +339,13 @@ then
     curl  $video_segment_url -o $video_seg_name  > /dev/null 2>1& 
     echo "downloading "${current_audio_seg%%\?*}
     curl  $audio_segment_url -o $audio_seg_name  > /dev/null 2>1& 
+    if [ -n $subtitle_media ]
+    then
+        echo "downloading "${current_subtitle_seg%%\?*}
+        curl  $subtitle_segment_url -o $subtitle_seg_name  > /dev/null 2>1&
+    fi
 fi
 
 sleep $interval
 
 done 
-
-
