@@ -51,7 +51,7 @@ function handle_timeline()
 {
     seg_start_pos=$(($(grep SegmentTimeline $mpd_file -n |head -1|awk -F: '{print $1}') + 1))
     seg_end_pos=$(($(grep /SegmentTimeline $mpd_file -n |head -1|awk -F: '{print $1}') - 1 ))
-    sed -n "${seg_start_pos},${seg_end_pos}p" $mpd_file > timeline.temp
+    sed -n "${seg_start_pos},${seg_end_pos}p" $mpd_file > timeline.tmp
     seg_count=0
     next_t=0
     while read line 
@@ -70,7 +70,7 @@ function handle_timeline()
 	fi
         next_t=$(($t + $d*($r + 1)))
         seg_count=$(($seg_count + $r + 1))
-    done   < timeline.temp 
+    done   < timeline.tmp 
 
     last_d=$d
     last_t=$(($t + $d * $r))
@@ -83,9 +83,9 @@ function handle_timeline()
 
 function list_all_seg_url()
 {
-    seg_start_pos=$(($(grep SegmentTimeline $mpd_file -n |head -1|awk -F: '{print $1}') + 1))
-    seg_end_pos=$(($(grep /SegmentTimeline $mpd_file -n |head -1|awk -F: '{print $1}') - 1 ))
-    sed -n "${seg_start_pos},${seg_end_pos}p" $mpd_file > timeline.temp
+    rep_id=$1
+    template_rep_seg=$2
+    awk -v rep_id=rep_id '{if(start==1 && /<\/SegmentTimeline/){exit};if(find==1 && start==1)print;if(/<Representation.*id="'$rep_id'"/){find=1};if(find==1 && /<SegmentTimeline/){start=1}}' $mpd_file  > timeline.tmp
     seg_count=0
     next_t=0
     while read line
@@ -104,14 +104,14 @@ function list_all_seg_url()
             fi
         for idx in $(seq 0 $r)
         do
-            seg_url=${video_rep_seg/\$Time\$/$t}
+            seg_url=${template_rep_seg/\$Time\$/$t}
             echo $seg_url
             t=$(($t + $d))
         done
         next_t=$t
         seg_count=$(($seg_count + $r + 1))
 
-    done   < timeline.temp
+    done   < timeline.tmp
     last_d=$d
     last_t=$(($t + $d * $r))
     echo "seg_count="$seg_count
@@ -294,7 +294,12 @@ then
         echo "not support template MPD"
         exit 0
     fi
-    list_all_seg_url
+    list_all_seg_url $video_Rep_id $video_rep_seg
+    list_all_seg_url $audio_Rep_id $audio_rep_seg
+    if [ -n $subtitle_media ]
+    then
+        list_all_seg_url $subtitle_Rep_id $subtitle_rep_seg
+    fi
     exit 0 
 fi 
 
