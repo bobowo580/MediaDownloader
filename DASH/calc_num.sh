@@ -34,15 +34,15 @@ function usage()
 function get_current_num()
 {
     if [ $mpd_type -eq 1 ]
-	then
-		current_number=$(($timeshift/($duration/$timescale) + $startNumber))
-	fi
+    then
+        current_number=$(($timeshift/($duration/$timescale) + $startNumber))
+    fi
 	
-	if [ $mpd_type -eq 2 ]
-	then
-		handle_timeline
-		current_number=$(($startNumber + $seg_count - 1 ))
-	fi
+    if [ $mpd_type -eq 2 ]
+    then
+        handle_timeline
+        current_number=$(($startNumber + $seg_count - 1 ))
+    fi
 	
 	
 }
@@ -81,7 +81,18 @@ echo "last_d="$last_d
 
 }
 
-
+function download_mpd()
+{
+    #rm -f $mpd_file
+    curl -v $req_url -o $mpd_file --connect-timeout 4 2>curl.result
+    resp=$(grep "< HTTP/.*200" curl.result)
+    if [ -z "$resp" ]
+    then
+        echo "Can not get MPD. "$req_url
+        cat curl.result
+        exit 0
+    fi
+}
 function list_all_seg_url()
 {
     seg_start_pos=$(($(grep SegmentTimeline $mpd_file -n |head -1|awk -F: '{print $1}') + 1))
@@ -154,16 +165,7 @@ done
 if [ -n "$req_url" ]
 then
     mpd_file="download.mpd"
-    rm -f $mpd_file
-    curl -v $req_url -o $mpd_file --connect-timeout 2 2>curl.result
-    resp=$(grep "< HTTP/.*200" curl.result)
-    if [ -z "$resp" ]
-    then 
-        echo "Can not get MPD. "$req_url
-        #grep "< HTTP/" curl.result
-        cat curl.result
-        exit 0
-    fi
+    download_mpd
 
     url_base=${req_url%/*}
     #echo $url_base 
@@ -227,23 +229,22 @@ echo "startNumber="$startNumber
 
 
 video_media=$(awk '/="video/{video=1} {if(video==1 && /<SegmentTemplate/)print }' $mpd_file |head -1|sed 's/ /\n/g'|grep media= |cut -d "\"" -f 2)
-#media=${media//\"/}
 echo "video_media="$video_media
 
 audio_media=$(awk '/="audio/{audio=1} {if(audio==1 && /<SegmentTemplate/)print }' $mpd_file |head -1|sed 's/ /\n/g'|grep media= |cut -d "\"" -f 2)
-#media=${media//\"/}
 echo "audio_media="$audio_media
 
+subtitle_media=$(awk '/="subtitle/{subtitle=1} {if(subtitle==1 && /<SegmentTemplate/)print }' $mpd_file |head -1|sed 's/ /\n/g'|grep media= |cut -d "\"" -f 2)
+echo "subtitle_media="$subtitle_media
+
 video_Rep_id=$(awk '/="video/{video=1} {if(video==1 && /<Representation/)print }'  $mpd_file |head -1|sed 's/ /\n/g'|grep id= |cut -d "\"" -f 2)
-#video_Rep_id=${video_Rep_id//\"/}
 echo "video_Representation_id="$video_Rep_id
 
 audio_Rep_id=$(awk '/="audio/{audio=1} {if(audio==1 && /<Representation/)print }'  $mpd_file |head -1|sed 's/ /\n/g'|grep id= |cut -d "\"" -f 2)
 echo "audio_Representation_id="$audio_Rep_id
 
-#Rep_id=$(grep "<Representation " $mpd_file |head -1|sed 's/ /\n/g'|grep id= |cut -d "\"" -f 2)
-
-
+subtitle_Rep_id=$(awk '/="subtitle/{subtitle=1} {if(subtitle==1 && /<Representation/)print }'  $mpd_file |head -1|sed 's/ /\n/g'|grep id= |cut -d "\"" -f 2)
+echo "subtitle_Representation_id="$subtitle_Rep_id
 
 
 availabilityStartTime1=${availabilityStartTime/Z/}
@@ -282,9 +283,7 @@ fi
 #Rep_seg=${media/\$RepresentationID\$/$Rep_id}
 video_rep_seg=${video_media/\$RepresentationID\$/$video_Rep_id}
 audio_rep_seg=${audio_media/\$RepresentationID\$/$audio_Rep_id}
-#current_seg=${Rep_seg/\$Number\$/$current_number}
-#current_seg=${current_seg/\$Time\$/$last_t}
-#echo "current_segment:"$current_seg
+subtitle_rep_seg=${subtitle_media/\$RepresentationID\$/$subtitle_Rep_id}
 
 if [ $list_url -eq 1 ]
 then 
@@ -295,36 +294,49 @@ fi
 
 while true
 do
-current_time=`date -u +%s`
-echo "current_time = "$current_time
-timeshift=$(($current_time - $AST))
-get_current_num #current_number=$(($timeshift/($duration/$timescale) + $startNumber))
-echo "current_number = "$current_number
+    current_time=`date -u +%s`
+    echo "current_time = "$current_time
+    timeshift=$(($current_time - $AST))
+    startNumber=$(grep SegmentTemplate $mpd_file |head -1|sed 's/ /\n/g'|grep startNumber |cut -d "\"" -f 2)
+    get_current_num #current_number=$(($timeshift/($duration/$timescale) + $startNumber))
+    echo "current_number = "$current_number
+    
+    current_video_seg=${video_rep_seg/\$Number\$/$current_number}
+    current_video_seg=${current_video_seg/\$Time\$/$last_t}
+    video_seg_name=${current_video_seg%\?*}
+    echo "current_video_segment: "$video_seg_name
+    video_segment_url=$url_base"/"$current_video_seg
+    echo "segment_video_url: "$video_segment_url
+    
+    current_audio_seg=${audio_rep_seg/\$Number\$/$current_number}
+    current_audio_seg=${current_audio_seg/\$Time\$/$last_t}
+    audio_seg_name=${current_audio_seg%\?*}
+    echo "current_audio_segment: "$audio_seg_name
+    audio_segment_url=$url_base"/"$current_audio_seg
+    echo "segment_audio_url: "$audio_segment_url
 
-current_video_seg=${video_rep_seg/\$Number\$/$current_number}
-current_video_seg=${current_video_seg/\$Time\$/$last_t}
-video_seg_name=${current_video_seg%\?*}
-echo "current_video_segment: "$video_seg_name
-video_segment_url=$url_base"/"$current_video_seg
-echo "segment_video_url: "$video_segment_url
-
-current_audio_seg=${audio_rep_seg/\$Number\$/$current_number}
-current_audio_seg=${current_audio_seg/\$Time\$/$last_t}
-audio_seg_name=${current_audio_seg%\?*}
-echo "current_audio_segment: "$audio_seg_name
-audio_segment_url=$url_base"/"$current_audio_seg
-echo "segment_audio_url: "$audio_segment_url
+    current_subtitle_seg=${subtitle_rep_seg/\$Number\$/$current_number}
+    current_subtitle_seg=${current_subtitle_seg/\$Time\$/$last_t}
+    subtitle_seg_name=${current_subtitle_seg%\?*}
+    echo "current_subtitle_segment: "$subtitle_seg_name
+    subtitle_segment_url=$url_base"/"$current_subtitle_seg
+    echo "segment_subtitle_url: "$subtitle_segment_url
 
 
-if [ $save_seg -eq 1 ]
-then
-    echo "downloading "${current_video_seg%%\?*}
-    curl  $video_segment_url -o $video_seg_name  > /dev/null 2>1& 
-    echo "downloading "${current_audio_seg%%\?*}
-    curl  $audio_segment_url -o $audio_seg_name  > /dev/null 2>1& 
-fi
 
-sleep $interval
+    if [ $save_seg -eq 1 ]
+    then
+        echo "downloading "${current_video_seg%%\?*}
+        curl  $video_segment_url -o $video_seg_name  > /dev/null 2>1& 
+        echo "downloading "${current_audio_seg%%\?*}
+        curl  $audio_segment_url -o $audio_seg_name  > /dev/null 2>1& 
+        echo "downloading "${current_subtitle_seg%%\?*}
+        curl  $subtitle_segment_url -o $subtitle_seg_name  > /dev/null 2>1&
+    fi
+    
+    sleep $interval
+    
+    download_mpd
 
 done 
 
