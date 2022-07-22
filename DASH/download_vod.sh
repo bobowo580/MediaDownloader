@@ -81,6 +81,13 @@ function handle_timeline()
 }
 
 
+function download_segment()
+{
+    file_name=${1%\?*}
+    file_name=${file_name##*/}
+    curl -s $1 -o $file_name  -w "$(date -u "+%Y-%m-%d_%H:%M:%S") %{http_code} $1 %{time_total}\n" |tee -a  download.log
+}
+
 function list_all_seg_url()
 {
     rep_id=$1
@@ -105,7 +112,17 @@ function list_all_seg_url()
         for idx in $(seq 0 $r)
         do
             seg_url=${template_rep_seg/\$Time\$/$t}
-            echo $url_base"/"$seg_url
+            if [ $save_seg -eq 1 ]
+            then
+                if [ ! -n "$url_base" ]
+                then
+                    echo "Invalid URL."
+                    exit 0                    
+                fi
+                download_segment $url_base"/"$seg_url
+            else
+                echo $url_base"/"$seg_url
+            fi
             t=$(($t + $d))
         done
         next_t=$t
