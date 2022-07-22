@@ -105,7 +105,7 @@ function list_all_seg_url()
         for idx in $(seq 0 $r)
         do
             seg_url=${template_rep_seg/\$Time\$/$t}
-            echo $seg_url
+            echo $url_base"/"$seg_url
             t=$(($t + $d))
         done
         next_t=$t
