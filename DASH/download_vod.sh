@@ -4,6 +4,7 @@ continue=false
 interval=0
 req_url=""
 past_time=""
+specified_rep_id=""
 mpd_file="temp.mpd"
 download_mpd=""
 save_path=""
@@ -20,11 +21,12 @@ function usage()
 {
     echo "Usage: $0 <-f mpd_file|-u mpd_url> [options...]"
     echo "Options:"
-    echo " -f mpd_file    parse local mpd file"
-    echo " -u mpd_url     get mpd from URL."
-    echo " -i interval    request segments interval, default value: segment duration"
-    echo " -w             download and save segments."
-    echo " -l             list all segments t for timeline MPD."
+    echo " -f <mpd_file>    parse local mpd file"
+    echo " -u <mpd_url>     get mpd from URL."
+    echo " -i [interval]    request segments interval, default value: segment duration"
+    echo " -w               download and save segments."
+    echo " -l               list all segments t for timeline MPD."
+    echo " -p <profile_id>  download specified profile only"
     exit 0;
 }
 
@@ -137,7 +139,7 @@ function list_all_seg_url()
 
 #todo: support timeline
 ################################### main ###################################################################
-while getopts f:ct:i:u:wlh OPTION; do
+while getopts f:ct:i:p:u:wlh OPTION; do
     case $OPTION in
     f)
         mpd_file=$OPTARG
@@ -150,6 +152,9 @@ while getopts f:ct:i:u:wlh OPTION; do
     ;;
     t)
         past_time=$OPTARG
+    ;;
+    p)
+        specified_rep_id=$OPTARG
     ;;
     w)
         save_seg=1
@@ -241,6 +246,17 @@ startNumber=$(grep SegmentTemplate $mpd_file |head -1|sed 's/ /\n/g'|grep startN
 #startNumber=${startNumber//\"/}
 echo "startNumber="$startNumber
 
+if [ -n "$specified_rep_id" ]
+then
+    specified_media=$(awk -v specified_rep_id=specified_rep_id  '{if(/<Representation.*id="'$specified_rep_id'"/){find=1};if(find==1 && /<SegmentTemplate/)print }' $mpd_file |head -1|sed 's/ /\n/g'|grep media= |cut -d "\"" -f 2)
+    if [ -z "$specified_media" ]
+    then
+        echo "Cant find "$specified_rep_id
+        exit 0
+    fi
+
+fi
+
 video_media=$(awk '/contentType="video"/{video=1} {if(video==1 && /<SegmentTemplate/)print }' $mpd_file |head -1|sed 's/ /\n/g'|grep media= |cut -d "\"" -f 2)
 #media=${media//\"/}
 echo "video_media="$video_media
@@ -311,11 +327,16 @@ then
         echo "not support template MPD"
         exit 0
     fi
-    list_all_seg_url $video_Rep_id $video_rep_seg
-    list_all_seg_url $audio_Rep_id $audio_rep_seg
-    if [ -n $subtitle_media ]
+    if [ ! -z "$specified_rep_id" ]
     then
-        list_all_seg_url $subtitle_Rep_id $subtitle_rep_seg
+        list_all_seg_url $specified_rep_id $specified_media
+    else
+        list_all_seg_url $video_Rep_id $video_rep_seg
+        list_all_seg_url $audio_Rep_id $audio_rep_seg
+        if [ -n $subtitle_media ]
+        then
+            list_all_seg_url $subtitle_Rep_id $subtitle_rep_seg
+        fi
     fi
     exit 0 
 fi 
