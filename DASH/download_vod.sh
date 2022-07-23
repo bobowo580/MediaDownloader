@@ -1,7 +1,7 @@
 #!/bin/bash
 
 continue=false
-interval=0
+interval=-1
 req_url=""
 past_time=""
 specified_rep_id=""
@@ -10,6 +10,7 @@ download_mpd=""
 save_path=""
 save_seg=0
 seg_count=0
+seg_duration=0
 last_d=0
 last_t=0
 # mpd_type: 1:template, 2:timeline
@@ -296,7 +297,7 @@ then
 fi
 
 
-if [ $interval -eq 0 ]
+if [ $interval -eq -1 ]
 then
     interval=$seg_duration
 fi
@@ -389,6 +390,10 @@ then
     fi
 fi
 
+if [ $((seg_duration*seg_count)) -gt $mediaPresentationDuration ]
+then
+    exit 0
+fi
 sleep $interval
 
 done 
