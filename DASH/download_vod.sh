@@ -25,7 +25,7 @@ function usage()
     echo " -f <mpd_file>    parse local mpd file"
     echo " -u <mpd_url>     get mpd from URL."
     echo " -i [interval]    request segments interval, default value: segment duration"
-    echo " -w               download and save segments."
+    echo " -s               download and save segments."
     echo " -l               list all segments t for timeline MPD."
     echo " -p <profile_id>  download specified profile only"
     exit 0;
@@ -80,7 +80,7 @@ function handle_timeline()
     echo "seg_count="$seg_count
     echo "last_t="$last_t
     echo "last_d="$last_d
-
+    rm timeline.tmp
 }
 
 
@@ -135,12 +135,13 @@ function list_all_seg_url()
     last_d=$d
     last_t=$(($t + $d * $r))
     echo "seg_count="$seg_count
+    rm timeline.tmp
 
 }
 
 #todo: support timeline
 ################################### main ###################################################################
-while getopts f:ct:i:p:u:wlh OPTION; do
+while getopts f:ct:i:p:u:slh OPTION; do
     case $OPTION in
     f)
         mpd_file=$OPTARG
@@ -157,7 +158,7 @@ while getopts f:ct:i:p:u:wlh OPTION; do
     p)
         specified_rep_id=$OPTARG
     ;;
-    w)
+    s)
         save_seg=1
     ;;
     l)
@@ -379,14 +380,11 @@ fi
 
 if [ $save_seg -eq 1 ]
 then
-    echo "downloading "${current_video_seg%%\?*}
-    curl  $video_segment_url -o $video_seg_name  > /dev/null 2>1& 
-    echo "downloading "${current_audio_seg%%\?*}
-    curl  $audio_segment_url -o $audio_seg_name  > /dev/null 2>1& 
+    download_segment $video_segment_url
+    download_segment $audio_segment_url
     if [ -n $subtitle_media ]
     then
-        echo "downloading "${current_subtitle_seg%%\?*}
-        curl  $subtitle_segment_url -o $subtitle_seg_name  > /dev/null 2>1&
+        download_segment $subtitle_segment_url
     fi
 fi
 
