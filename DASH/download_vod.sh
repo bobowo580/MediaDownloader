@@ -331,7 +331,8 @@ then
     fi
     if [ ! -z "$specified_rep_id" ]
     then
-        list_all_seg_url $specified_rep_id $specified_media
+        specified_rep_seg=${specified_media/\$RepresentationID\$/$specified_rep_id}
+        list_all_seg_url $specified_rep_id $specified_rep_seg
     else
         list_all_seg_url $video_Rep_id $video_rep_seg
         list_all_seg_url $audio_Rep_id $audio_rep_seg
